@@ -116,7 +116,7 @@ Transaction History
 
 📚 Extra notes:
 
-Through this project, we've practiced:
+Topics:
 • C fundamentals (loops, conditionals, arrays, functions)
 • Structs for modeling user accounts
 • String manipulation with strcpy, strcmp, sprintf
