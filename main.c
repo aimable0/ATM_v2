@@ -4,20 +4,19 @@
 #include <stdbool.h>
 
 #define TOT_USERS 4
-
+#define INITIAL_BALANCE 0.00
 #define MAX_TRANSACTIONS 5
 
-
-//Function Prototypes
-void atm();
-void atmMenu();
-void checkBalance();
-void deposit();
-void withdraw();
+// Function declarations
 void viewTransactions();
 void logTransaction(const char *action);
+void check_balance(double balance);
+double deposit(double current_balance, double amount);
+double withdraw(double current_balance, double amount);
+void atm(void);
+void clearTransactions(char transactions[], int transaction_count);
 
-float balance = 0;
+// Global variables
 char transactions[MAX_TRANSACTIONS][50];
 int transaction_count = 0;
 
@@ -47,37 +46,26 @@ int main(void)
     strcpy(users[3].username, "levis");
     strcpy(users[3].pincode, "0004");
 
-    // get user's credentials
+    // user provided credentials
     char u_username[15];
     char u_pincode[5];
 
-    start:;
+    login_again:
     printf("-------- LOG IN ---------\n");
+
+    login:
     printf("Enter username (q to quit): ");
     scanf("%s", u_username);
 
-    // see if the user want to quit
+    // quit
     if (u_username[0] == 'q' && u_username[1] == '\0') {
-        printf("Thank you for using our service!\n");
+        printf("Good bye! ...\n");
         return 0;
-    }
-
-    bool user = false;
-    for (int i = 0; i < TOT_USERS; i++)
-    {
-        if (strcmp(users[i].username, u_username) == 0) {
-            user = true;
-            break;
-        }
-
-    }
-    if (!user) {
-        printf("Invalid username !\n");
-        goto start;
     }
 
     printf("Enter pincode: ");
     scanf("%s", u_pincode);
+
 
     bool valid_user = false;
     int i = 0;
@@ -90,90 +78,130 @@ int main(void)
 
     if (valid_user == true) {
         printf("\nHello, %s!\n\n", users[i].username);
-        // place ATM HERE
         atm();
-        goto start;
-
+        goto login_again;
     } else {
-        printf("Oops, not found in our database! try a different username or pincode.\n");
+        printf("Oops, login failed! try a different username or pincode.\n");
+        goto login;
     }
 
-	    return 0;
+    return 0;
 }
 
-// ATM Function Definitions
-void atm() {
-    printf("------------------ ATM Menu---------------\n");
-    atmMenu();
-    printf("\nThank you for using ATM. Goodbye!\n");
+
+
+// Function implementations
+void check_balance(double balance) {
+    printf("\n$$ Current Balance: $%.2f\n\n", balance);
 }
 
-void atmMenu() {
-    int choice;
-    do {
-        printf("1. Check Balance\n");
-        printf("2. Deposit Money\n");
-        printf("3. Withdraw Money\n");
-        printf("4. View Transactions\n");
-        printf("5. Logout\n");
-        printf("Enter choice: ");
-        scanf("%d", &choice);
+double deposit(double current_balance, double amount) {
+    return current_balance + amount;
+}
 
-        switch (choice) {
-            case 1: checkBalance(); break;
-            case 2: deposit(); break;
-            case 3: withdraw(); break;
-            case 4: viewTransactions(); break;
-            case 5: printf("Exiting ATM...\n"); break;
-            default: printf("Invalid choice. Try again.\n");
+double withdraw(double current_balance, double amount) {
+    return current_balance - amount;
+}
+
+void atm(void) {
+    int usr_choice = 0;
+    double balance = INITIAL_BALANCE;
+    double amount = 0.00;
+    char log[50]; // to store transaction details
+
+    printf("============ ATM (SIMULATOR) ===========\n\n");
+
+    while (1) {
+        // Display menu
+        printf("Choose:\n");
+        printf("  (1) Deposit Money\n");
+        printf("  (2) Check Account Balance\n");
+        printf("  (3) Withdraw Money\n");
+        printf("  (4) Transaction history\n");
+        printf("  (5) Logout\n\n");
+
+        // Get user choice
+        printf("(prompt) Choose action [1-4]: ");
+        if (scanf("%d", &usr_choice) != 1) {
+            printf("Invalid input. Please enter a number!\n\n");
+            // clear invalid buffer
+            while (getchar() != '\n');
+            continue;
         }
-    } while (choice != 5);
-}
 
-void checkBalance() {
-    printf("Your current balance is: $%.2f\n", balance);
-    logTransaction("Checked balance");
-}
+        while (getchar() != '\n'); // clear any leftover input
 
+        // Handle user choice
+        switch (usr_choice) {
+            case 1: // Deposit
+                printf("\n$$ Enter amount to deposit: ");
+                scanf("%lf", &amount);
 
-void deposit() {
-    float amount;
-    printf("Enter deposit amount: $");
-    scanf("%f", &amount);
+                // clear any leftover input
+                while(getchar() != '\n');
 
-    if (amount > 0) {
-        balance += amount;
-        printf("Successfully deposited $%.2f\n", amount);
+                if (amount <= 0) {
+                    printf("Invalid amount! Must be greater than 0.\n\n");
+                } else {
+                    balance = deposit(balance, amount);
+                    printf("++ $%.2f deposited successfully!\n\n", amount);
+                }
+                // saving transaction
+                sprintf(log, "Deposited $%.2f", amount);
+                logTransaction(log);
+                break;
 
-        char log[50];
-        sprintf(log, "Deposited $%.2f", amount);
-        logTransaction(log);
-    } else {
-        printf("Invalid deposit amount.\n");
+            case 2: // Check balance
+                check_balance(balance);
+
+                // saving transaction
+                sprintf(log, "Checked balance $%.2f", amount);
+                logTransaction(log);
+                break;
+
+            case 3: // Withdraw
+                printf("\n$$ Enter amount to withdraw: ");
+                scanf("%lf", &amount);
+
+                // clear any leftover input
+                while(getchar() != '\n');
+
+                if (amount <= 0) {
+                    printf("Invalid amount! Must be greater than 0.\n\n");
+                } else if (amount > balance) {
+                    printf("Not enough funds! Current balance: $%.2f\n\n", balance);
+                } else {
+                    balance = withdraw(balance, amount);
+                    printf("-- Withdrawal of $%.2f successful.\n\n", amount);
+                    check_balance(balance);
+                }
+
+                // saving transaction
+                sprintf(log, "Withdrew $%.2f", amount);
+                logTransaction(log);
+                break;
+
+            case 4:
+                viewTransactions();
+                printf("\n");
+                break;
+            case 5: // Exit
+                // clearTransactions(transactions, transaction_count);
+                transaction_count = 0; // reset transaction count.
+                printf("\n... Goodbye! Thanks for using ATM Simulator ...\n\n");
+                return;
+
+            default:
+                printf("Oops! Invalid option. Please choose between 1-4.\n\n");
+                break;
+        }
     }
+
 }
 
-
-void withdraw() {
-    float amount;
-    printf("Enter withdrawal amount: $");
-    scanf("%f", &amount);
-
-    if (amount > 0 && balance >= amount) {
-        balance -= amount;
-        printf("Successfully withdrew $%.2f\n", amount);
-
-        char log[50];
-        sprintf(log, "Withdrew $%.2f", amount);
-        logTransaction(log);
-    } else {
-        printf("Insufficient balance or invalid amount.\n");
-    }
-}
-
-
+// loggin transaction functions
 void viewTransactions() {
-    printf("\n------------------ Transaction History ------------------\n");
+    printf("\n------- Transaction History ---------\n");
     if (transaction_count == 0) {
         printf("No transactions yet.\n");
     } else {
@@ -197,3 +225,12 @@ void logTransaction(const char *action) {
     }
 }
 
+// void clearTransactions(char transactions[], int transaction_count)
+// {
+//     char log[50]; // to store transaction details
+//     int amt = 0;
+//     for (int i = 0; i < transaction_count; i++) {
+//         sprintf(log, "Empty transaction", amt);
+//         logTransaction(log);
+//     }
+// }
