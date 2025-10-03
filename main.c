@@ -8,8 +8,6 @@
 #define MAX_TRANSACTIONS 5
 
 
-
-
 //Function Prototypes
 void atm();
 void atmMenu();
@@ -19,7 +17,7 @@ void withdraw();
 void viewTransactions();
 void logTransaction(const char *action);
 
-float balance = 0; 
+float balance = 0;
 char transactions[MAX_TRANSACTIONS][50];
 int transaction_count = 0;
 
@@ -27,34 +25,56 @@ typedef struct
 {
     char username[15];
     char pincode[5];
-} person;
+} User;
 
 int main(void)
 {
-    person users[TOT_USERS];
+    User users[TOT_USERS];
 
     // user 1
     strcpy(users[0].username, "karake");
     strcpy(users[0].pincode, "0001");
 
     // user 2
-    strcpy(users[0].username, "simeon");
-    strcpy(users[0].pincode, "0002");
+    strcpy(users[1].username, "simeon");
+    strcpy(users[1].pincode, "0002");
 
     // user 3
-    strcpy(users[0].username, "manzi");
-    strcpy(users[0].pincode, "0003");
+    strcpy(users[2].username, "manzi");
+    strcpy(users[2].pincode, "0003");
 
     // user 4
-    strcpy(users[0].username, "levis");
-    strcpy(users[0].pincode, "0004");
+    strcpy(users[3].username, "levis");
+    strcpy(users[3].pincode, "0004");
 
     // get user's credentials
     char u_username[15];
     char u_pincode[5];
 
-    printf("Enter username: ");
+    start:;
+    printf("-------- LOG IN ---------\n");
+    printf("Enter username (q to quit): ");
     scanf("%s", u_username);
+
+    // see if the user want to quit
+    if (u_username[0] == 'q' && u_username[1] == '\0') {
+        printf("Thank you for using our service!\n");
+        return 0;
+    }
+
+    bool user = false;
+    for (int i = 0; i < TOT_USERS; i++)
+    {
+        if (strcmp(users[i].username, u_username) == 0) {
+            user = true;
+            break;
+        }
+
+    }
+    if (!user) {
+        printf("Invalid username !\n");
+        goto start;
+    }
 
     printf("Enter pincode: ");
     scanf("%s", u_pincode);
@@ -69,12 +89,10 @@ int main(void)
     }
 
     if (valid_user == true) {
-        printf("------------------ ATM ---------------\n");
-        printf("Hello, %s!\n", users[i].username);
-        printf("ATM is loading ...\n");
+        printf("\nHello, %s!\n\n", users[i].username);
         // place ATM HERE
-
         atm();
+        goto start;
 
     } else {
         printf("Oops, not found in our database! try a different username or pincode.\n");
@@ -83,24 +101,21 @@ int main(void)
 	    return 0;
 }
 
-// ATM Function Definitions 
+// ATM Function Definitions
 void atm() {
-    printf("-------------------- Simple ATM System --------------------\n");
+    printf("------------------ ATM Menu---------------\n");
     atmMenu();
     printf("\nThank you for using ATM. Goodbye!\n");
-    
-    
 }
 
 void atmMenu() {
     int choice;
     do {
-        printf("\n------------------ ATM Menu ------------------\n");
         printf("1. Check Balance\n");
         printf("2. Deposit Money\n");
         printf("3. Withdraw Money\n");
         printf("4. View Transactions\n");
-        printf("5. Exit\n");
+        printf("5. Logout\n");
         printf("Enter choice: ");
         scanf("%d", &choice);
 
