@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/aimable/Documents/ATM_v2",
+      "program": "/Users/aimable/Documents/ATM_v2/build/Debug/outDebug"
+    }
+  ]
+}
