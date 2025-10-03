@@ -43,10 +43,21 @@ int main(void)
     scanf("%s", u_pincode);
 
     bool valid_user = false;
-    for (int i = 0; i < TOT_USERS; i++) {
-        if (strcmp(users[i].username, u_username) == 0 && strcmp(users[i].pincode, u_pincode) == 0)
+    int i = 0;
+    for (i = 0; i < TOT_USERS; i++) {
+        if (strcmp(users[i].username, u_username) == 0 && strcmp(users[i].pincode, u_pincode) == 0) {
             valid_user = true;
+            break;
+        }
     }
 
-    // ATM SYSTEM.
+    if (valid_user == true) {
+        printf("------------------ ATM ---------------\n");
+        printf("Hello, %s!\n", users[i].username);
+        printf("ATM is loading ...\n");
+        // place ATM HERE
+
+    } else {
+        printf("Oops, not found in our database! try a different username or pincode.\n");
+    }
 }
